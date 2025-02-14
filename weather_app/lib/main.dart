@@ -5,22 +5,9 @@ import 'screens/home_screen.dart';
 
 void main() {
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => WeatherProvider()),
-      ],
-      child: MyApp(),
+    ChangeNotifierProvider(
+      create: (_) => WeatherProvider(),
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Weather Forecast',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomeScreen(),
-    );
-  }
 }

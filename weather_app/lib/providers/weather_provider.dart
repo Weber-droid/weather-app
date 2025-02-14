@@ -1,44 +1,47 @@
 import 'package:flutter/material.dart';
-import '../models/weather_model.dart';
+import 'package:geolocator/geolocator.dart';
+import '../models/weather.dart';
 import '../services/weather_service.dart';
-import '../services/location_service.dart';
 
 class WeatherProvider with ChangeNotifier {
+  final WeatherService _weatherService = WeatherService();
   Weather? _weather;
   bool _isLoading = false;
+  String _errorMessage = '';
 
   Weather? get weather => _weather;
   bool get isLoading => _isLoading;
-
-  final WeatherService _weatherService = WeatherService();
-  final LocationService _locationService = LocationService();
+  String get errorMessage => _errorMessage;
 
   Future<void> fetchWeatherByCity(String city) async {
-    _isLoading = true;
-    notifyListeners();
-
+    _setLoading(true);
     try {
-      _weather = await _weatherService.fetchWeather(city);
+      _weather = await _weatherService.fetchWeatherByCity(city);
+      _errorMessage = '';
     } catch (e) {
-      print(e);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _errorMessage = 'Could not fetch weather data';
     }
+    _setLoading(false);
   }
 
   Future<void> fetchWeatherByLocation() async {
-    _isLoading = true;
-    notifyListeners();
-
+    _setLoading(true);
     try {
-      final position = await _locationService.getCurrentLocation();
+      Position position = await _determinePosition();
       _weather = await _weatherService.fetchWeatherByLocation(position.latitude, position.longitude);
+      _errorMessage = '';
     } catch (e) {
-      print('Error fetching weather by location: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _errorMessage = 'Could not fetch weather data';
     }
+    _setLoading(false);
+  }
+
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  Future<Position> _determinePosition() async {
+    return await Geolocator.getCurrentPosition();
   }
 }

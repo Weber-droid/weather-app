@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/weather_provider.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/weather_icon.dart';
-import '../widgets/forecast_list.dart';
+import '../widgets/weather_card.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -11,27 +10,26 @@ class HomeScreen extends StatelessWidget {
     final weatherProvider = Provider.of<WeatherProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Weather Forecast')),
-      body: Column(
+      appBar: AppBar(title: Text('Weather App')),
+      body: weatherProvider.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : weatherProvider.weather != null
+              ? WeatherCard(weather: weatherProvider.weather!)
+              : Center(child: Text('Search for a city or fetch your location weather')),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          SearchBarr(onSearch: weatherProvider.fetchWeatherByCity),
-          ElevatedButton(
-            onPressed: weatherProvider.fetchWeatherByLocation,
-            child: Text('Get Weather by Location'),
+          FloatingActionButton(
+            heroTag: 'search',
+            child: Icon(Icons.search),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SearchScreen())),
           ),
-          if (weatherProvider.isLoading)
-            CircularProgressIndicator()
-          else if (weatherProvider.weather != null)
-            Expanded(
-              child: Column(
-                children: [
-                  Text(weatherProvider.weather!.cityName),
-                  Text('${weatherProvider.weather!.temperature}°C'),
-                  WeatherIcon(iconUrl: weatherProvider.weather!.icon),
-                  ForecastList(forecast: weatherProvider.weather!.forecast),
-                ],
-              ),
-            ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'location',
+            child: Icon(Icons.my_location),
+            onPressed: weatherProvider.fetchWeatherByLocation,
+          ),
         ],
       ),
     );
