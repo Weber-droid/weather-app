@@ -17,6 +17,19 @@ class WeatherService {
     }
   }
 
+  Future<Weather> fetchWeatherByLocation(double lat, double lon) async {
+    final response = await http.get(
+      Uri.parse('${Constants.baseUrl}/weather?lat=$lat&lon=$lon&appid=${Constants.apiKey}&units=metric'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return _parseWeather(data);
+    } else {
+      throw Exception('Failed to load weather data');
+    }
+  }
+
   Weather _parseWeather(Map<String, dynamic> data) {
     return Weather(
       cityName: data['name'],
